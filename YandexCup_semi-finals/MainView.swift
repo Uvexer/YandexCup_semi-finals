@@ -38,6 +38,8 @@ struct MainView: View {
             
             HStack {
                 Image(activeImage == "pencil" ? "penciltap" : "pencil")
+                    .resizable()
+                    .frame(width: 30, height: 30)  
                     .onTapGesture {
                         activeImage = (activeImage == "pencil") ? nil : "pencil"
                     }
@@ -45,6 +47,8 @@ struct MainView: View {
                 Spacer()
                 
                 Image(activeImage == "brush" ? "brushtap" : "brush")
+                    .resizable()
+                    .frame(width: 30, height: 30)
                     .onTapGesture {
                         activeImage = (activeImage == "brush") ? nil : "brush"
                     }
@@ -52,6 +56,8 @@ struct MainView: View {
                 Spacer()
                 
                 Image(activeImage == "eraser" ? "erasertap" : "eraser")
+                    .resizable()
+                    .frame(width: 30, height: 30)
                     .onTapGesture {
                         activeImage = (activeImage == "eraser") ? nil : "eraser"
                     }
@@ -59,12 +65,12 @@ struct MainView: View {
                 Spacer()
                 
                 Image(activeImage == "eclipsik" ? "eclipsiktap" : "eclipsik")
+                    .resizable()
+                    .frame(width: 30, height: 30)
                     .onTapGesture {
                         activeImage = (activeImage == "eclipsik") ? nil : "eclipsik"
                     }
-        
             }
-            
             .padding(.horizontal, 40)
         }
     }
