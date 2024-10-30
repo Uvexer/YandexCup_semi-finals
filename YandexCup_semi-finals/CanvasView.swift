@@ -2,10 +2,15 @@ import SwiftUI
 
 struct CanvasView: View {
     @Binding var activeImage: String?
-
-    @State private var drawingPath = Path()
-    @State private var erasedPath = Path()
-
+    
+    @State private var drawingPaths: [PathData] = []
+    @State private var currentPath = Path()
+    
+    struct PathData {
+        var path: Path
+        var isEraser: Bool
+    }
+    
     var body: some View {
         ZStack {
             Image("paper")
@@ -13,36 +18,43 @@ struct CanvasView: View {
                 .scaledToFit()
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
-
+            
             Canvas { context, size in
-             
-                context.stroke(drawingPath, with: .color(.black), lineWidth: 2)
-
+                for pathData in drawingPaths {
+                    if pathData.isEraser {
+                        context.blendMode = .destinationOut
+                        context.fill(pathData.path, with: .color(.black))
+                    } else {
+                        context.blendMode = .normal
+                        context.stroke(pathData.path, with: .color(.black), lineWidth: 2)
+                    }
+                }
                 
-                context.blendMode = .destinationOut
-                context.fill(erasedPath, with: .color(.black))
+                if activeImage == "pencil" {
+                    context.blendMode = .normal
+                    context.stroke(currentPath, with: .color(.black), lineWidth: 2)
+                }
             }
             .gesture(
                 DragGesture()
                     .onChanged { value in
                         if activeImage == "pencil" {
-                          
-                            if drawingPath.isEmpty {
-                                drawingPath.move(to: value.location)
+                            if currentPath.isEmpty {
+                                currentPath.move(to: value.location)
                             } else {
-                                drawingPath.addLine(to: value.location)
+                                currentPath.addLine(to: value.location)
                             }
                         } else if activeImage == "eraser" {
-                          
                             let eraserRadius: CGFloat = 10
-                            let eraseRect = CGRect(x: value.location.x - eraserRadius, y: value.location.y - eraserRadius, width: eraserRadius * 2, height: eraserRadius * 2)
-                            erasedPath.addEllipse(in: eraseRect)
+                            var erasePath = Path()
+                            erasePath.addEllipse(in: CGRect(x: value.location.x - eraserRadius, y: value.location.y - eraserRadius, width: eraserRadius * 2, height: eraserRadius * 2))
+                            drawingPaths.append(PathData(path: erasePath, isEraser: true))
                         }
                     }
                     .onEnded { _ in
-                        if activeImage == "eraser" {
-                           
-                            erasedPath = erasedPath
+                        if activeImage == "pencil" {
+                            drawingPaths.append(PathData(path: currentPath, isEraser: false))
+                            currentPath = Path()
                         }
                     }
             )
