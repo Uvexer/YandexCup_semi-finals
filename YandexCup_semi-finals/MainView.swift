@@ -13,7 +13,7 @@ struct MainView: View {
             
             Spacer(minLength: 20)
             
-            CanvasView(lines: $lines, activeImage: $activeImage)
+            CanvasView(activeImage: $activeImage)
             
             Spacer(minLength: 40)
             
