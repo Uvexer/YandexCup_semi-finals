@@ -13,6 +13,8 @@ struct CanvasView: View {
     struct PathData {
         var path: Path
         var isEraser: Bool
+        var lineWidth: CGFloat
+        var color: Color
     }
     
     func clearCanvas() {
@@ -48,19 +50,21 @@ struct CanvasView: View {
                         context.fill(pathData.path, with: .color(.black))
                     } else {
                         context.blendMode = .normal
-                        context.stroke(pathData.path, with: .color(.black), lineWidth: 2)
+                        context.stroke(pathData.path, with: .color(pathData.color), lineWidth: pathData.lineWidth)
                     }
                 }
                 
-                if activeImage == "pencil" {
+                if activeImage == "pencil" || activeImage == "brush" {
+                    let lineWidth: CGFloat = activeImage == "brush" ? 6 : 2
+                    let color: Color = activeImage == "brush" ? .blue : .black
                     context.blendMode = .normal
-                    context.stroke(currentPath, with: .color(.black), lineWidth: 2)
+                    context.stroke(currentPath, with: .color(color), lineWidth: lineWidth)
                 }
             }
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        if activeImage == "pencil" {
+                        if activeImage == "pencil" || activeImage == "brush" {
                             if currentPath.isEmpty {
                                 currentPath.move(to: value.location)
                             } else {
@@ -70,16 +74,17 @@ struct CanvasView: View {
                             let eraserRadius: CGFloat = 10
                             var erasePath = Path()
                             erasePath.addEllipse(in: CGRect(x: value.location.x - eraserRadius, y: value.location.y - eraserRadius, width: eraserRadius * 2, height: eraserRadius * 2))
-                            drawingPaths.append(PathData(path: erasePath, isEraser: true))
+                            drawingPaths.append(PathData(path: erasePath, isEraser: true, lineWidth: eraserRadius * 2, color: .black))
                         }
                     }
                     .onEnded { _ in
-                        if activeImage == "pencil" {
+                        if activeImage == "pencil" || activeImage == "brush" {
+                            let lineWidth: CGFloat = activeImage == "brush" ? 6 : 2
+                            let color: Color = activeImage == "brush" ? .blue : .black
                             undoStack.append(drawingPaths)
-                            drawingPaths.append(PathData(path: currentPath, isEraser: false))
+                            drawingPaths.append(PathData(path: currentPath, isEraser: false, lineWidth: lineWidth, color: color))
                             currentPath = Path()
                             redoStack.removeAll()
-                            
                         }
                     }
             )
