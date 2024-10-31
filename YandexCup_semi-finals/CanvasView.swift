@@ -2,37 +2,48 @@ import SwiftUI
 
 struct CanvasView: View {
     @Binding var activeImage: String?
+    @Binding var currentFrameImage: UIImage?  
     var undoAction: () -> Void
     var redoAction: () -> Void
+    var onSaveImage: (UIImage) -> Void
     
     @State private var drawingPaths: [PathData] = []
     @State private var currentPath = Path()
     @State private var undoStack: [[PathData]] = []
     @State private var redoStack: [[PathData]] = []
+    @State private var backgroundImage: UIImage? = nil
     
-    struct PathData {
+    struct PathData: Identifiable {
+        let id = UUID()
         var path: Path
         var isEraser: Bool
         var lineWidth: CGFloat
         var color: Color
     }
+        private func performUndo() {
+            guard !drawingPaths.isEmpty else { return }
+            redoStack.append(drawingPaths)
+            drawingPaths = undoStack.popLast() ?? []
+        }
+    
+        private func performRedo() {
+            guard let redoPaths = redoStack.popLast() else { return }
+            undoStack.append(drawingPaths)
+            drawingPaths = redoPaths
+        }
     
     func clearCanvas() {
         drawingPaths.removeAll()
         undoStack.removeAll()
         redoStack.removeAll()
+        backgroundImage = nil
     }
     
-    private func performUndo() {
-        guard !drawingPaths.isEmpty else { return }
-        redoStack.append(drawingPaths)
-        drawingPaths = undoStack.popLast() ?? []
-    }
-    
-    private func performRedo() {
-        guard let redoPaths = redoStack.popLast() else { return }
-        undoStack.append(drawingPaths)
-        drawingPaths = redoPaths
+    private func saveAsImage() {
+        let renderer = ImageRenderer(content: self)
+        if let image = renderer.uiImage {
+            onSaveImage(image)
+        }
     }
     
     var body: some View {
@@ -42,6 +53,14 @@ struct CanvasView: View {
                 .scaledToFit()
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
+            
+            if let bgImage = backgroundImage {
+                Image(uiImage: bgImage)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(20)
+                    .padding(.horizontal, 16)
+            }
             
             Canvas { context, size in
                 for pathData in drawingPaths {
@@ -90,18 +109,29 @@ struct CanvasView: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: 1000)
-        .onChange(of: activeImage) {
-            if activeImage == "trash" {
+        .onAppear {
+           
+            if let currentFrame = currentFrameImage {
+                backgroundImage = currentFrame
+                currentFrameImage = nil
+            }
+        }
+        .onChange(of: activeImage) { newValue in
+            if newValue == "trash" {
                 clearCanvas()
                 activeImage = nil
-            } else if activeImage == "left" {
+            }else if newValue == "left" {
                 performUndo()
                 activeImage = nil
-            } else if activeImage == "right" {
+            } else if newValue == "right" {
                 performRedo()
                 activeImage = nil
+            }else if newValue == "clear" {
+                    saveAsImage()
+                    clearCanvas()  
+                    activeImage = nil
+                }
             }
         }
     }
-}
 
