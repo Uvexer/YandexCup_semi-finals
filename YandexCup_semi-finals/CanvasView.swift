@@ -2,9 +2,13 @@ import SwiftUI
 
 struct CanvasView: View {
     @Binding var activeImage: String?
+    var undoAction: () -> Void
+    var redoAction: () -> Void
     
     @State private var drawingPaths: [PathData] = []
     @State private var currentPath = Path()
+    @State private var undoStack: [[PathData]] = []
+    @State private var redoStack: [[PathData]] = []
     
     struct PathData {
         var path: Path
@@ -13,8 +17,22 @@ struct CanvasView: View {
     
     func clearCanvas() {
         drawingPaths.removeAll()
+        undoStack.removeAll()
+        redoStack.removeAll()
     }
-
+    
+    private func performUndo() {
+        guard !drawingPaths.isEmpty else { return }
+        redoStack.append(drawingPaths)
+        drawingPaths = undoStack.popLast() ?? []
+    }
+    
+    private func performRedo() {
+        guard let redoPaths = redoStack.popLast() else { return }
+        undoStack.append(drawingPaths)
+        drawingPaths = redoPaths
+    }
+    
     var body: some View {
         ZStack {
             Image("paper")
@@ -57,8 +75,11 @@ struct CanvasView: View {
                     }
                     .onEnded { _ in
                         if activeImage == "pencil" {
+                            undoStack.append(drawingPaths)
                             drawingPaths.append(PathData(path: currentPath, isEraser: false))
                             currentPath = Path()
+                            redoStack.removeAll()
+                            
                         }
                     }
             )
@@ -67,7 +88,13 @@ struct CanvasView: View {
         .onChange(of: activeImage) {
             if activeImage == "trash" {
                 clearCanvas()
-                activeImage = nil 
+                activeImage = nil
+            } else if activeImage == "left" {
+                performUndo()
+                activeImage = nil
+            } else if activeImage == "right" {
+                performRedo()
+                activeImage = nil
             }
         }
     }

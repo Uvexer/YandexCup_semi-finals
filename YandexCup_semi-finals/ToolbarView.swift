@@ -1,13 +1,21 @@
 import SwiftUI
 
 struct ToolbarView: View {
-    let clearAction: () -> Void 
+    let clearAction: () -> Void
+    let undoAction: () -> Void
+    let redoAction: () -> Void
 
     var body: some View {
         HStack {
             HStack(spacing: 20) {
                 Image("left")
+                    .onTapGesture {
+                        undoAction()
+                    }
                 Image("right")
+                    .onTapGesture {
+                        redoAction()
+                    }
             }
             Spacer(minLength: 40)
             

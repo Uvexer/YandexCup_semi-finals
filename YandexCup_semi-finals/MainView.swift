@@ -8,13 +8,25 @@ struct MainView: View {
         VStack {
             Spacer(minLength: 10)
             
-            ToolbarView(clearAction: {
-                activeImage = "trash" 
-            })
+            ToolbarView(
+                clearAction: {
+                    activeImage = "trash"
+                },
+                undoAction: {
+                    activeImage = "left"
+                },
+                redoAction: {
+                    activeImage = "right"
+                }
+            )
             
             Spacer(minLength: 20)
             
-            CanvasView(activeImage: $activeImage)
+            CanvasView(
+                activeImage: $activeImage,
+                undoAction: {},
+                redoAction: {}
+            )
             
             Spacer(minLength: 40)
             
