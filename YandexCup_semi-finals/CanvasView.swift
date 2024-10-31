@@ -11,6 +11,10 @@ struct CanvasView: View {
         var isEraser: Bool
     }
     
+    func clearCanvas() {
+        drawingPaths.removeAll()
+    }
+
     var body: some View {
         ZStack {
             Image("paper")
@@ -60,6 +64,12 @@ struct CanvasView: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: 1000)
+        .onChange(of: activeImage) {
+            if activeImage == "trash" {
+                clearCanvas()
+                activeImage = nil 
+            }
+        }
     }
 }
 

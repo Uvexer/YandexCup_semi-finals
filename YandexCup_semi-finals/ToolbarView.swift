@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ToolbarView: View {
+    let clearAction: () -> Void 
+
     var body: some View {
         HStack {
             HStack(spacing: 20) {
@@ -11,6 +13,9 @@ struct ToolbarView: View {
             
             HStack(spacing: 20) {
                 Image("trash")
+                    .onTapGesture {
+                        clearAction()
+                    }
                 Image("adds")
                 Image("stratum")
             }

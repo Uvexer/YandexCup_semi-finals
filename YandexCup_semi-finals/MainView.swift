@@ -3,13 +3,14 @@ import SwiftUI
 
 struct MainView: View {
     @State private var activeImage: String? = nil
-    @State private var lines: [[CGPoint]] = [[]]
-
+    
     var body: some View {
         VStack {
             Spacer(minLength: 10)
             
-            ToolbarView()
+            ToolbarView(clearAction: {
+                activeImage = "trash" 
+            })
             
             Spacer(minLength: 20)
             
