@@ -41,11 +41,12 @@ struct CanvasView: View {
     
     private func saveAsImage() {
         let renderer = ImageRenderer(content: self)
+        renderer.scale = UIScreen.main.scale
         if let image = renderer.uiImage {
             onSaveImage(image)
         }
     }
-    
+
     var body: some View {
         ZStack {
             Image("paper")
@@ -53,11 +54,11 @@ struct CanvasView: View {
                 .scaledToFit()
                 .cornerRadius(20)
                 .padding(.horizontal, 16)
-            
+
             if let bgImage = backgroundImage {
                 Image(uiImage: bgImage)
                     .resizable()
-                    .scaledToFit()
+                    .aspectRatio(contentMode: .fill)
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
             }
@@ -109,13 +110,18 @@ struct CanvasView: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: 1000)
-        .onAppear {
-           
-            if let currentFrame = currentFrameImage {
-                backgroundImage = currentFrame
-                currentFrameImage = nil
-            }
-        }
+          .onAppear {
+              if let currentFrame = currentFrameImage {
+                  backgroundImage = currentFrame
+                  currentFrameImage = nil
+              }
+          }
+          .onChange(of: currentFrameImage) { newValue in
+              if let newImage = newValue {
+                  backgroundImage = newImage
+                  currentFrameImage = nil
+              }
+          }
         .onChange(of: activeImage) { newValue in
             if newValue == "trash" {
                 clearCanvas()
