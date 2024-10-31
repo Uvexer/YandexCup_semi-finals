@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MainView: View {
     @State private var activeImage: String? = nil
+    @State private var isStratumViewPresented = false
     
     var body: some View {
         VStack {
@@ -17,6 +18,9 @@ struct MainView: View {
                 },
                 redoAction: {
                     activeImage = "right"
+                },
+                stratumAction: {
+                    isStratumViewPresented = true
                 }
             )
             
@@ -32,6 +36,9 @@ struct MainView: View {
             
             ToolSelectorView(activeImage: $activeImage)
         }
+        .sheet(isPresented: $isStratumViewPresented) {
+            StratumView(isPresented: $isStratumViewPresented)
+                .presentationDetents([.fraction(0.7)])
+        }
     }
 }
-
