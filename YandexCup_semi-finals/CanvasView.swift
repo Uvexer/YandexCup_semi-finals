@@ -2,7 +2,9 @@ import SwiftUI
 
 struct CanvasView: View {
     @Binding var activeImage: String?
-    @Binding var currentFrameImage: UIImage?  
+    @Binding var currentFrameImage: UIImage?
+    @Binding var figures: [Figure]
+    
     var undoAction: () -> Void
     var redoAction: () -> Void
     var onSaveImage: (UIImage) -> Void
@@ -12,6 +14,7 @@ struct CanvasView: View {
     @State private var undoStack: [[PathData]] = []
     @State private var redoStack: [[PathData]] = []
     @State private var backgroundImage: UIImage? = nil
+    @GestureState private var dragOffset: CGSize = .zero
     
     struct PathData: Identifiable {
         let id = UUID()
@@ -20,23 +23,25 @@ struct CanvasView: View {
         var lineWidth: CGFloat
         var color: Color
     }
-        private func performUndo() {
-            guard !drawingPaths.isEmpty else { return }
-            redoStack.append(drawingPaths)
-            drawingPaths = undoStack.popLast() ?? []
-        }
     
-        private func performRedo() {
-            guard let redoPaths = redoStack.popLast() else { return }
-            undoStack.append(drawingPaths)
-            drawingPaths = redoPaths
-        }
+    private func performUndo() {
+        guard !drawingPaths.isEmpty else { return }
+        redoStack.append(drawingPaths)
+        drawingPaths = undoStack.popLast() ?? []
+    }
+    
+    private func performRedo() {
+        guard let redoPaths = redoStack.popLast() else { return }
+        undoStack.append(drawingPaths)
+        drawingPaths = redoPaths
+    }
     
     func clearCanvas() {
         drawingPaths.removeAll()
         undoStack.removeAll()
         redoStack.removeAll()
         backgroundImage = nil
+        figures.removeAll()
     }
     
     private func saveAsImage() {
@@ -108,36 +113,84 @@ struct CanvasView: View {
                         }
                     }
             )
+            
+            ForEach($figures) { $figure in
+                figureView(for: figure.type)
+                    .position(figure.position)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                figure.position = CGPoint(x: value.location.x + dragOffset.width, y: value.location.y + dragOffset.height)
+                            }
+                            .updating($dragOffset) { value, state, _ in
+                                state = value.translation
+                            }
+                    )
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: 1000)
-          .onAppear {
-              if let currentFrame = currentFrameImage {
-                  backgroundImage = currentFrame
-                  currentFrameImage = nil
-              }
-          }
-          .onChange(of: currentFrameImage) { newValue in
-              if let newImage = newValue {
-                  backgroundImage = newImage
-                  currentFrameImage = nil
-              }
-          }
+        .onAppear {
+            if let currentFrame = currentFrameImage {
+                backgroundImage = currentFrame
+                currentFrameImage = nil
+            }
+        }
+        .onChange(of: currentFrameImage) { newValue in
+            if let newImage = newValue {
+                backgroundImage = newImage
+                currentFrameImage = nil
+            }
+        }
         .onChange(of: activeImage) { newValue in
             if newValue == "trash" {
                 clearCanvas()
                 activeImage = nil
-            }else if newValue == "left" {
+            } else if newValue == "left" {
                 performUndo()
                 activeImage = nil
             } else if newValue == "right" {
                 performRedo()
                 activeImage = nil
-            }else if newValue == "clear" {
-                    saveAsImage()
-                    clearCanvas()  
-                    activeImage = nil
-                }
+            } else if newValue == "clear" {
+                saveAsImage()
+                clearCanvas()
+                activeImage = nil
             }
         }
     }
+    
+    @ViewBuilder
+    private func figureView(for figure: FigureType) -> some View {
+        switch figure {
+        case .square:
+            Rectangle()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.blue)
+        case .circle:
+            Circle()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.red)
+        case .triangle:
+            TriangleShape()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.green)
+        case .up:
+            Image(systemName: "arrow.up")
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.yellow)
+        }
+    }
+}
+
+struct TriangleShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
 

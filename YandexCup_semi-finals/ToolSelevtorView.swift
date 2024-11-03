@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ToolSelectorView: View {
     @Binding var activeImage: String?
+    @Binding var selectedFigure: FigureType?
     @State private var showFiguresPopover = false
 
     var body: some View {

@@ -1,10 +1,22 @@
 import SwiftUI
 
+enum FigureType {
+    case square, circle, triangle, up
+}
+
+struct Figure: Identifiable {
+    let id = UUID()
+    var type: FigureType
+    var position: CGPoint
+}
+
 struct MainView: View {
     @State private var activeImage: String? = nil
+    @State private var selectedFigureType: FigureType? = nil
     @State private var isStratumViewPresented = false
     @State private var frames: [UIImage] = []
     @State private var currentFrameImage: UIImage? = nil
+    @State private var figures: [Figure] = [] 
 
     var body: some View {
         VStack {
@@ -33,6 +45,7 @@ struct MainView: View {
             CanvasView(
                 activeImage: $activeImage,
                 currentFrameImage: $currentFrameImage,
+                figures: $figures,
                 undoAction: {},
                 redoAction: {},
                 onSaveImage: { image in
@@ -42,16 +55,15 @@ struct MainView: View {
 
             Spacer(minLength: 40)
 
-            ToolSelectorView(activeImage: $activeImage)
+            ToolSelectorView(activeImage: $activeImage, selectedFigure: $selectedFigureType)
                 .overlay(
-                  
                     Group {
                         if activeImage == "figures" {
                             HStack(spacing: 20) {
-                                Image("square")
-                                Image("circle")
-                                Image("triangle")
-                                Image("up")
+                                Image("square").onTapGesture { addFigure(.square) }
+                                Image("circle").onTapGesture { addFigure(.circle) }
+                                Image("triangle").onTapGesture { addFigure(.triangle) }
+                                Image("up").onTapGesture { addFigure(.up) }
                             }
                             .font(.title)
                             .padding()
@@ -73,6 +85,11 @@ struct MainView: View {
             }
             .presentationDetents([.fraction(0.7)])
         }
+    }
+
+    private func addFigure(_ type: FigureType) {
+        let newFigure = Figure(type: type, position: CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2))
+        figures.append(newFigure)
     }
 }
 
