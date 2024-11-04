@@ -11,17 +11,18 @@ struct Figure: Identifiable {
 }
 
 struct MainView: View {
+    @State private var selectedColor: Color = .black
     @State private var activeImage: String? = nil
     @State private var selectedFigureType: FigureType? = nil
     @State private var isStratumViewPresented = false
     @State private var frames: [UIImage] = []
     @State private var currentFrameImage: UIImage? = nil
     @State private var figures: [Figure] = []
-
+    
     var body: some View {
         VStack {
             Spacer(minLength: 10)
-
+            
             ToolbarView(
                 clearAction: {
                     activeImage = "trash"
@@ -39,10 +40,11 @@ struct MainView: View {
                     isStratumViewPresented = true
                 }
             )
-
+            
             Spacer(minLength: 20)
-
+            
             CanvasView(
+                selectedColor: $selectedColor,
                 activeImage: $activeImage,
                 currentFrameImage: $currentFrameImage,
                 figures: $figures,
@@ -52,9 +54,10 @@ struct MainView: View {
                     frames.append(image)
                 }
             )
-
+            
+            
             Spacer(minLength: 40)
-
+            
             ToolSelectorView(activeImage: $activeImage, selectedFigure: $selectedFigureType)
                 .overlay(
                     Group {
@@ -76,12 +79,16 @@ struct MainView: View {
                             .animation(.easeInOut(duration: 0.5), value: activeImage)
                         } else if activeImage == "eclipsik" {
                             HStack(spacing: 20) {
-                                Image("drawer").onTapGesture { addEclipsik("drawer") }
-                                Image("circle1").onTapGesture { addEclipsik("circle1") }
-                                Image("circle2").onTapGesture { addEclipsik("circle2") }
-                                Image("circle3").onTapGesture { addEclipsik("circle3") }
-                                Image("circle4").onTapGesture { addEclipsik("circle4") }
+                                Circle().fill(Color.white).frame(width: 40, height: 40)
+                                    .onTapGesture { selectedColor = .white }
+                                Circle().fill(Color.red).frame(width: 40, height: 40)
+                                    .onTapGesture { selectedColor = .red }
+                                Circle().fill(Color.black).frame(width: 40, height: 40)
+                                    .onTapGesture { selectedColor = .black }
+                                Circle().fill(Color.blue).frame(width: 40, height: 40)
+                                    .onTapGesture { selectedColor = .blue }
                             }
+                            .padding()
                             .font(.title)
                             .padding()
                             .background(BlurView(style: .systemMaterial))
@@ -103,12 +110,12 @@ struct MainView: View {
             .presentationDetents([.fraction(0.7)])
         }
     }
-
+    
     private func addFigure(_ type: FigureType) {
         let newFigure = Figure(type: type, position: CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2))
         figures.append(newFigure)
     }
-
+    
     private func addEclipsik(_ name: String) {
         
     }
@@ -117,10 +124,10 @@ struct MainView: View {
 
 struct BlurView: UIViewRepresentable {
     var style: UIBlurEffect.Style
-
+    
     func makeUIView(context: Context) -> UIVisualEffectView {
         return UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
-
+    
     func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
 }

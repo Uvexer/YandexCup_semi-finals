@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CanvasView: View {
+    @Binding var selectedColor: Color
     @Binding var activeImage: String?
     @Binding var currentFrameImage: UIImage?
     @Binding var figures: [Figure]
@@ -81,11 +82,13 @@ struct CanvasView: View {
                 
                 if activeImage == "pencil" || activeImage == "brush" {
                     let lineWidth: CGFloat = activeImage == "brush" ? 6 : 2
-                    let color: Color = activeImage == "brush" ? .blue : .black
-                    context.blendMode = .normal
+                    let color: Color = activeImage == "brush" ? selectedColor : selectedColor
                     context.stroke(currentPath, with: .color(color), lineWidth: lineWidth)
+
+               
                 }
             }
+          
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -105,14 +108,14 @@ struct CanvasView: View {
                     .onEnded { _ in
                         if activeImage == "pencil" || activeImage == "brush" {
                             let lineWidth: CGFloat = activeImage == "brush" ? 6 : 2
-                            let color: Color = activeImage == "brush" ? .blue : .black
                             undoStack.append(drawingPaths)
-                            drawingPaths.append(PathData(path: currentPath, isEraser: false, lineWidth: lineWidth, color: color))
+                            drawingPaths.append(PathData(path: currentPath, isEraser: false, lineWidth: lineWidth, color: selectedColor))
                             currentPath = Path()
                             redoStack.removeAll()
                         }
                     }
             )
+
             
             ForEach($figures) { $figure in
                 figureView(for: figure.type)
