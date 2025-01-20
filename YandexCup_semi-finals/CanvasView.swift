@@ -5,18 +5,18 @@ struct CanvasView: View {
     @Binding var activeImage: String?
     @Binding var currentFrameImage: UIImage?
     @Binding var figures: [Figure]
-    
+
     var undoAction: () -> Void
     var redoAction: () -> Void
     var onSaveImage: (UIImage) -> Void
-    
+
     @State private var drawingPaths: [PathData] = []
     @State private var currentPath = Path()
     @State private var undoStack: [[PathData]] = []
     @State private var redoStack: [[PathData]] = []
     @State private var backgroundImage: UIImage? = nil
     @GestureState private var dragOffset: CGSize = .zero
-    
+
     struct PathData: Identifiable {
         let id = UUID()
         var path: Path
@@ -24,19 +24,19 @@ struct CanvasView: View {
         var lineWidth: CGFloat
         var color: Color
     }
-    
+
     private func performUndo() {
         guard !drawingPaths.isEmpty else { return }
         redoStack.append(drawingPaths)
         drawingPaths = undoStack.popLast() ?? []
     }
-    
+
     private func performRedo() {
         guard let redoPaths = redoStack.popLast() else { return }
         undoStack.append(drawingPaths)
         drawingPaths = redoPaths
     }
-    
+
     func clearCanvas() {
         drawingPaths.removeAll()
         undoStack.removeAll()
@@ -44,7 +44,7 @@ struct CanvasView: View {
         backgroundImage = nil
         figures.removeAll()
     }
-    
+
     private func saveAsImage() {
         let renderer = ImageRenderer(content: self)
         renderer.scale = UIScreen.main.scale
@@ -68,8 +68,8 @@ struct CanvasView: View {
                     .cornerRadius(20)
                     .padding(.horizontal, 16)
             }
-            
-            Canvas { context, size in
+
+            Canvas { context, _ in
                 for pathData in drawingPaths {
                     if pathData.isEraser {
                         context.blendMode = .destinationOut
@@ -79,16 +79,14 @@ struct CanvasView: View {
                         context.stroke(pathData.path, with: .color(pathData.color), lineWidth: pathData.lineWidth)
                     }
                 }
-                
+
                 if activeImage == "pencil" || activeImage == "brush" {
                     let lineWidth: CGFloat = activeImage == "brush" ? 6 : 2
                     let color: Color = activeImage == "brush" ? selectedColor : selectedColor
                     context.stroke(currentPath, with: .color(color), lineWidth: lineWidth)
-
-               
                 }
             }
-          
+
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -116,7 +114,6 @@ struct CanvasView: View {
                     }
             )
 
-            
             ForEach($figures) { $figure in
                 figureView(for: figure.type)
                     .position(figure.position)
@@ -161,7 +158,7 @@ struct CanvasView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private func figureView(for figure: FigureType) -> some View {
         switch figure {
@@ -196,4 +193,3 @@ struct TriangleShape: Shape {
         return path
     }
 }
-

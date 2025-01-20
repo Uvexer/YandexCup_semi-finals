@@ -18,116 +18,66 @@ struct MainView: View {
     @State private var frames: [UIImage] = []
     @State private var currentFrameImage: UIImage? = nil
     @State private var figures: [Figure] = []
-    
+
     var body: some View {
         VStack {
             Spacer(minLength: 10)
-            
-            ToolbarView(
-                clearAction: {
-                    activeImage = "trash"
-                },
-                undoAction: {
-                    activeImage = "left"
-                },
-                redoAction: {
-                    activeImage = "right"
-                },
-                saveFrameAction: {
-                    activeImage = "clear"
-                },
-                stratumAction: {
-                    isStratumViewPresented = true
-                }
+            ToolbarSection(
+                activeImage: $activeImage,
+                isStratumViewPresented: $isStratumViewPresented
             )
-            
             Spacer(minLength: 20)
-            
-            CanvasView(
+            CanvasSection(
                 selectedColor: $selectedColor,
                 activeImage: $activeImage,
                 currentFrameImage: $currentFrameImage,
                 figures: $figures,
-                undoAction: {},
-                redoAction: {},
-                onSaveImage: { image in
-                    frames.append(image)
-                }
+                frames: $frames
             )
-            
-            
             Spacer(minLength: 40)
-            
-            ToolSelectorView(activeImage: $activeImage, selectedFigure: $selectedFigureType)
-                .overlay(
-                    Group {
-                        if activeImage == "figures" {
-                            HStack(spacing: 20) {
-                                Image("square").onTapGesture { addFigure(.square) }
-                                Image("circle").onTapGesture { addFigure(.circle) }
-                                Image("triangle").onTapGesture { addFigure(.triangle) }
-                                Image("up").onTapGesture { addFigure(.up) }
-                            }
-                            .font(.title)
-                            .padding()
-                            .background(BlurView(style: .systemMaterial))
-                            .cornerRadius(10)
-                            .shadow(radius: 10)
-                            .offset(x: -30, y: -50)
-                            .scaleEffect(activeImage == "figures" ? 1 : 0.8)
-                            .opacity(activeImage == "figures" ? 1 : 0)
-                            .animation(.easeInOut(duration: 0.5), value: activeImage)
-                        } else if activeImage == "eclipsik" {
-                            HStack(spacing: 20) {
-                                Circle().fill(Color.white).frame(width: 40, height: 40)
-                                    .onTapGesture { selectedColor = .white }
-                                Circle().fill(Color.red).frame(width: 40, height: 40)
-                                    .onTapGesture { selectedColor = .red }
-                                Circle().fill(Color.black).frame(width: 40, height: 40)
-                                    .onTapGesture { selectedColor = .black }
-                                Circle().fill(Color.blue).frame(width: 40, height: 40)
-                                    .onTapGesture { selectedColor = .blue }
-                            }
-                            .padding()
-                            .font(.title)
-                            .padding()
-                            .background(BlurView(style: .systemMaterial))
-                            .cornerRadius(10)
-                            .shadow(radius: 10)
-                            .offset(x: -30, y: -50)
-                            .scaleEffect(activeImage == "eclipsik" ? 1 : 0.8)
-                            .opacity(activeImage == "eclipsik" ? 1 : 0)
-                            .animation(.easeInOut(duration: 0.5), value: activeImage)
-                        }
-                    },
-                    alignment: .bottomTrailing
-                )
+            ToolSelectorSection(
+                activeImage: $activeImage,
+                selectedFigureType: $selectedFigureType,
+                selectedColor: $selectedColor,
+                addFigure: addFigure
+            )
         }
         .sheet(isPresented: $isStratumViewPresented) {
-            StratumView(isPresented: $isStratumViewPresented, frames: frames) { selectedImage in
-                currentFrameImage = selectedImage
-            }
-            .presentationDetents([.fraction(0.7)])
+            StratumSection(
+                isPresented: $isStratumViewPresented,
+                frames: frames,
+                onSelectImage: { selectedImage in
+                    currentFrameImage = selectedImage
+                }
+            )
         }
     }
-    
+
     private func addFigure(_ type: FigureType) {
         let newFigure = Figure(type: type, position: CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2))
         figures.append(newFigure)
     }
-    
-    private func addEclipsik(_ name: String) {
-        
+}
+
+extension View {
+    func styleOverlay() -> some View {
+        font(.title)
+            .padding()
+            .background(BlurView(style: .systemMaterial))
+            .cornerRadius(10)
+            .shadow(radius: 10)
+            .offset(x: -30, y: -50)
+            .scaleEffect(1)
+            .animation(.easeInOut(duration: 0.5), value: true)
     }
 }
 
-
 struct BlurView: UIViewRepresentable {
     var style: UIBlurEffect.Style
-    
-    func makeUIView(context: Context) -> UIVisualEffectView {
-        return UIVisualEffectView(effect: UIBlurEffect(style: style))
+
+    func makeUIView(context _: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
-    
-    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
+
+    func updateUIView(_: UIVisualEffectView, context _: Context) {}
 }

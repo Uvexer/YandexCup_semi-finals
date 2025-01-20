@@ -29,7 +29,7 @@ struct ToolbarView: View {
                     }
                 Image("adds")
                     .onTapGesture {
-                        saveFrameAction() 
+                        saveFrameAction()
                     }
                 Image("stratum")
                     .onTapGesture {

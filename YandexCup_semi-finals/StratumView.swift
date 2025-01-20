@@ -21,7 +21,7 @@ struct StratumView: View {
                         .padding(.bottom, 20)
                         .onTapGesture {
                             onFrameSelected(frame)
-                            isPresented = false    
+                            isPresented = false
                         }
                 }
             }

@@ -21,4 +21,3 @@ struct ToolSelectorView: View {
         .padding(.horizontal, 40)
     }
 }
-
