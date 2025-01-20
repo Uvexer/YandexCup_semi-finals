@@ -2,9 +2,9 @@
 <img width="1156" alt="Снимок экрана 2025-01-20 в 7 35 18 PM" src="https://github.com/user-attachments/assets/b38492b6-df70-46e9-af41-600ce98ffe6a" />
 
 <div style="display: flex; justify-content: space-between; align-items: center;">
-  <img width="300" alt="Снимок экрана 2025-01-20 в 7 56 55 PM" src="https://github.com/user-attachments/assets/04e20278-f222-465b-a3ac-9b121a10ab08" />
-  <img width="300" alt="Снимок экрана 2025-01-20 в 7 57 14 PM" src="https://github.com/user-attachments/assets/fb3a2ab7-21e2-4bd6-a2f6-cb3daf3c810d" />
-  <img width="300" alt="Снимок экрана 2025-01-20 в 7 56 34 PM" src="https://github.com/user-attachments/assets/f96c6468-50f8-41e0-9c24-e6623e3eb84e" />
+  <img width="250" alt="Снимок экрана 2025-01-20 в 7 56 55 PM" src="https://github.com/user-attachments/assets/04e20278-f222-465b-a3ac-9b121a10ab08" />
+  <img width="250" alt="Снимок экрана 2025-01-20 в 7 57 14 PM" src="https://github.com/user-attachments/assets/fb3a2ab7-21e2-4bd6-a2f6-cb3daf3c810d" />
+  <img width="250" alt="Снимок экрана 2025-01-20 в 7 56 34 PM" src="https://github.com/user-attachments/assets/f96c6468-50f8-41e0-9c24-e6623e3eb84e" />
 </div>
 
 ## Требования
